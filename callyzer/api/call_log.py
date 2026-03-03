@@ -810,31 +810,48 @@ def post_api(url, api_key, payload):
 	url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
 	headers = build_callyzer_headers(api_key)
 	try:
-		response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=20)
+		try:
+			response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=20)
+		except requests.exceptions.ReadTimeout:
+			# First attempt timed out — retry once with a longer timeout before giving up
+			frappe.log_error(_("Callyzer API timed out (20s). Retrying with 60s timeout."), _("Callyzer Timeout Retry"))
+			response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=60)
+
 		if response.status_code == 429:
 			time.sleep(5)
-			response = requests.post(url, json=payload, headers=headers)
+			response = requests.post(url, json=payload, headers=headers, timeout=60)
 
 		if response.status_code != 200:
 			frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
 
 		return response.json().get("result", {})
 		
+	except requests.exceptions.ReadTimeout:
+		frappe.log_error(frappe.get_traceback(), _("Callyzer API Timeout"))
+		frappe.throw(_("Callyzer API timed out after retry. The server is taking too long to respond."))
 	except requests.exceptions.RequestException as e:
-		frappe.log_error(frappe.get_traceback(), _("Callyzer API Error"))
+		frappe.log_error(_("Callyzer API Error"), frappe.get_traceback())
 		frappe.throw(_("Error communicating with Callyzer API: ") + str(e))
 
 def get_api(url, api_key, payload):
 	url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
 	headers = build_callyzer_headers(api_key)
 	try:
-		response = requests.get(url, headers=headers, data=json.dumps(payload), timeout=20)
+		try:
+			response = requests.get(url, headers=headers, data=json.dumps(payload), timeout=20)
+		except requests.exceptions.ReadTimeout:
+			# Retry once with a longer timeout
+			frappe.log_error(_("Callyzer GET API timed out (20s). Retrying with 60s timeout."), _("Callyzer Timeout Retry"))
+			response = requests.get(url, headers=headers, data=json.dumps(payload), timeout=60)
 
 		if response.status_code != 200:
 			frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
 
 		return response.json().get("result", {})
 		
+	except requests.exceptions.ReadTimeout:
+		frappe.log_error(_("Callyzer API Timeout"),frappe.get_traceback())
+		frappe.throw(_("Callyzer API timed out after retry. The server is taking too long to respond."))
 	except requests.exceptions.RequestException as e:
 		frappe.log_error(frappe.get_traceback(), _("Callyzer API Error"))
 		frappe.throw(_("Error communicating with Callyzer API: ") + str(e))
