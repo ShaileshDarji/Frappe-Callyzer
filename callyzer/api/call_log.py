@@ -617,9 +617,13 @@ def fetch_call_history_report():
 	call_to = frappe.form_dict.get("call_to")
 
 	if call_from and call_to:
-		# Convert to Unix timestamp if needed
+		# Convert date strings to Unix timestamps.
+		# call_from = start of the from_date (00:00:00)
+		# call_to   = end of the to_date (23:59:59) so the full last day is included
+		from datetime import datetime as _dt, time as _time
 		call_from = int(time.mktime(frappe.utils.getdate(call_from).timetuple()))
-		call_to = int(time.mktime(frappe.utils.getdate(call_to).timetuple()))
+		call_to_date = frappe.utils.getdate(call_to)
+		call_to = int(time.mktime(_dt.combine(call_to_date, _time(23, 59, 59)).timetuple()))
 		endpoint = get_endpoint(end_point_name)[0]  # only get the endpoint string
 	else:
 		# Use default logic if dates are not provided
@@ -632,7 +636,8 @@ def fetch_call_history_report():
 		company = setting["company"]
 		token = setting["api_key"]
 
-		url = setting['domain_api'] + endpoint
+		# Strip trailing slash from domain_api to avoid double-slash URLs
+		url = setting['domain_api'].rstrip('/') + endpoint
 		page_size = 100
 		page_no = 1
 
@@ -649,7 +654,7 @@ def fetch_call_history_report():
 
 			result = post_api(url, token, payload)
 			
-			if len(result)==0:
+			if not result:
 				break
 
 			process_call_history_response(result, company)
@@ -801,6 +806,8 @@ def callyzer_call_log_webhook():
 
 #Tested working
 def post_api(url, api_key, payload):
+	# Normalise any double-slash that arises when domain_api ends with / and endpoint starts with /
+	url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
 	headers = build_callyzer_headers(api_key)
 	try:
 		response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=20)
@@ -818,6 +825,7 @@ def post_api(url, api_key, payload):
 		frappe.throw(_("Error communicating with Callyzer API: ") + str(e))
 
 def get_api(url, api_key, payload):
+	url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
 	headers = build_callyzer_headers(api_key)
 	try:
 		response = requests.get(url, headers=headers, data=json.dumps(payload), timeout=20)
