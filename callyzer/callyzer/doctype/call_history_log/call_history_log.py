@@ -15,7 +15,7 @@ class CallHistoryLog(Document):
 				self._add_lead_comment(lead_name)
 		except Exception:
 			# Never let this block the main insert — just log and move on
-			frappe.log_error(frappe.get_traceback(), "Callyzer: Failed to link Call History Log to Lead")
+			frappe.log_error("Callyzer: Failed to link Call History Log to Lead", frappe.get_traceback())
 
 	def _find_matching_lead(self):
 		"""

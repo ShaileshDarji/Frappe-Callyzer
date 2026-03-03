@@ -801,7 +801,7 @@ def callyzer_call_log_webhook():
 		}
 
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Webhook: Failed to process Callyzer data")
+		frappe.log_error("Webhook: Failed to process Callyzer data", frappe.get_traceback())
 		return {"status": "error", "message": "Processing failed"}
 
 #Tested working
@@ -827,7 +827,7 @@ def post_api(url, api_key, payload):
 		return response.json().get("result", {})
 		
 	except requests.exceptions.ReadTimeout:
-		frappe.log_error(frappe.get_traceback(), _("Callyzer API Timeout"))
+		frappe.log_error(_("Callyzer API Timeout"), frappe.get_traceback())
 		frappe.throw(_("Callyzer API timed out after retry. The server is taking too long to respond."))
 	except requests.exceptions.RequestException as e:
 		frappe.log_error(_("Callyzer API Error"), frappe.get_traceback())
@@ -853,7 +853,7 @@ def get_api(url, api_key, payload):
 		frappe.log_error(_("Callyzer API Timeout"),frappe.get_traceback())
 		frappe.throw(_("Callyzer API timed out after retry. The server is taking too long to respond."))
 	except requests.exceptions.RequestException as e:
-		frappe.log_error(frappe.get_traceback(), _("Callyzer API Error"))
+		frappe.log_error(_("Callyzer API Error"), frappe.get_traceback())
 		frappe.throw(_("Error communicating with Callyzer API: ") + str(e))
 
 def get_valid_callyzer_settings(company):
