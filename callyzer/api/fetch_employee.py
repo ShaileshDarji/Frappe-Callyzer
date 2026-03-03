@@ -46,7 +46,7 @@ def fetch_employees():
             created = process_employee_response(data)
             total_created += created
         except Exception as e:
-            frappe.log_error(frappe.get_traceback(), f"Failed to fetch employees for {setting.name}")
+            frappe.log_error(f"Failed to fetch employees for {setting.name}", frappe.get_traceback())
 
     frappe.msgprint(f"Successfully created {total_created} new employee(s).")
 
@@ -106,7 +106,7 @@ def callyzer_employee_webhook():
 
         return {"status": "success", "created": created}
     except Exception:
-        frappe.log_error(frappe.get_traceback(), "Webhook: Failed to process Callyzer Employee data")
+        frappe.log_error("Webhook: Failed to process Callyzer Employee data", frappe.get_traceback())
         return {"status": "error", "message": "Processing failed"}
 
 def parse_datetime(value):
