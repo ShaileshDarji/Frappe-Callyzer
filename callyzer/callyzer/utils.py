@@ -1,6 +1,8 @@
 import frappe
-from datetime import datetime
+from datetime import datetime, timedelta
 from frappe import _
+
+MAX_DATE_RANGE_DAYS = 179
 
 def get_callyzer_settings(company=None):
     filters = {"is_active": 1}
@@ -65,7 +67,13 @@ def get_endpoint(endpoint_name):
             endpoint_url = endpoint["endpoint"]
             call_from = format_time_timestamp_(endpoint["last_fetched"])
             break
-        
+
+    # Callyzer API enforces a 180-day maximum date range.
+    # Cap call_from so it is never more than MAX_DATE_RANGE_DAYS before call_to.
+    max_call_from = call_to - (MAX_DATE_RANGE_DAYS * 24 * 60 * 60)
+    if call_from is None or call_from < max_call_from:
+        call_from = max_call_from
+
     return endpoint_url, call_from, call_to
 
 def update_last_fetched_time(endpoint_name):
