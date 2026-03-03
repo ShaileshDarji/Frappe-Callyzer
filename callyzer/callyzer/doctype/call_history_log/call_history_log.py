@@ -20,16 +20,27 @@ class CallHistoryLog(Document):
 	def _find_matching_lead(self):
 		"""
 		Look up a Lead whose mobile_no matches client_number.
-		Callyzer strips the leading zero, so we try both:
-		  - exact match:     712345678  (as stored in Callyzer)
-		  - with leading 0:  0712345678 (as stored in the Lead)
+		Callyzer stores numbers without a leading zero (e.g. 712345678).
+		Leads may store numbers in any of these formats:
+		  712345678  |  0712345678  |  254712345678  |  +254712345678
+		We try all variants so we match regardless of how the Lead was entered.
 		Returns the Lead name (docname) or None.
 		"""
 		client_number = self.client_number
 		if not client_number:
 			return None
 
-		candidates = [client_number, "0" + client_number]
+		# Strip any leading zeros or country-code prefixes to get the bare local number
+		bare = client_number.lstrip("0").lstrip("+")
+		if bare.startswith("254"):
+			bare = bare[3:]  # remove country code, leaving e.g. 712345678
+
+		candidates = [
+			bare,               # 712345678
+			"0" + bare,         # 0712345678
+			"254" + bare,       # 254712345678
+			"+254" + bare,      # +254712345678
+		]
 
 		for number in candidates:
 			lead = frappe.db.get_value("Lead", {"mobile_no": number}, "name")
