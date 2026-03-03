@@ -19,7 +19,7 @@ def execute(filters=None):
 		params["to_date"] = filters["to_date"]
 
 	if filters.get("employee"):
-		conditions += " AND emp_name = %(employee)s"
+		conditions += " AND employee_name = %(employee)s"
 		params["employee"] = filters["employee"]
 
 	data = frappe.db.sql(f"""
