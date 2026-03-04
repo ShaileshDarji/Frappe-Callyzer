@@ -1,4 +1,5 @@
 import frappe
+import calendar
 from datetime import datetime, timedelta
 from frappe import _
 
@@ -35,15 +36,18 @@ def get_employees():
 
 
 def format_time_timestamp_(date):
+    """Convert a datetime or UTC datetime string to a UTC Unix timestamp.
+    Uses calendar.timegm() which always treats the input as UTC,
+    unlike time.mktime() / .timestamp() which use the local OS timezone.
+    """
     if isinstance(date, str):
-        # Try parsing the common Frappe datetime format
+        # Frappe stores all datetimes in UTC — parse without timezone assumption
         try:
             date = frappe.utils.get_datetime(date)
         except Exception:
-            # Fallback if parsing fails
             date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-    
-    return int(date.timestamp())
+
+    return calendar.timegm(date.timetuple())
 
 
 def get_endpoint_settings():

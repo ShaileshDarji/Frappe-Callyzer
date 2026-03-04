@@ -79,3 +79,22 @@ class CallHistoryLog(Document):
 			"content": content,
 		})
 		comment.insert(ignore_permissions=True)
+
+		# --- TESTING: email notification --- comment out when done ---
+		site_url = frappe.utils.get_url()
+		lead_url = f"{site_url}/app/lead/{frappe.utils.quote(lead_name)}"
+		frappe.sendmail(
+			recipients=["s.kimeu@apex-steel.com"],
+			subject=f"[Callyzer] Call activity linked to Lead: {lead_name}",
+			message=(
+				f"<p>A call log has been matched and a comment added to the Lead below.</p>"
+				f"<p><b>Lead:</b> <a href='{lead_url}'>{lead_name}</a></p>"
+				f"<p><b>Employee:</b> {employee}</p>"
+				f"<p><b>Call Type:</b> {call_type}</p>"
+				f"<p><b>Date / Time:</b> {call_date} {call_time}</p>"
+				f"<p><b>Duration:</b> {duration_str}</p>"
+				f"<p><b>Note:</b> {note_text or '—'}</p>"
+			),
+			now=True,
+		)
+		# --- END TESTING ---
