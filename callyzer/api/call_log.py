@@ -263,7 +263,11 @@ def fetch_never_attended_calls():
 				"page_no": page_no,
 				"page_size": 100
 			}
-			result = post_api(url, token, payload)
+			try:
+				result = post_api(url, token, payload)
+			except Exception:
+				frappe.log_error("Callyzer: Never Attended page fetch failed", frappe.get_traceback())
+				break
 			if not result:
 				break
 			handle_never_attended_calls(result, company)
@@ -343,7 +347,11 @@ def fetch_not_pickup_by_client_calls():
 				"page_no": page_no,
 				"page_size": 100
 			}
-			result = post_api(url, token, payload)
+			try:
+				result = post_api(url, token, payload)
+			except Exception:
+				frappe.log_error("Callyzer: Not Pickup By Client page fetch failed", frappe.get_traceback())
+				break
 			if not result:
 				break
 			handle_not_pickup_by_client_calls(result, company)
@@ -680,8 +688,12 @@ def fetch_call_history_report(call_from=None, call_to=None):
 				"page_size": page_size
 			}
 
-			result = post_api(url, token, payload)
-			
+			try:
+				result = post_api(url, token, payload)
+			except Exception:
+				frappe.log_error("Callyzer: Call History page fetch failed", frappe.get_traceback())
+				break
+
 			if not result:
 				break
 
