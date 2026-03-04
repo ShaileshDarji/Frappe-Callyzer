@@ -251,21 +251,25 @@ def fetch_never_attended_calls():
 		company = setting["company"]
 		url = setting['domain_api'].rstrip('/') + endpoint
 		token = setting["api_key"]
+		page_no = 1
 
-		payload = {
-			"call_from": int(call_from),
-			"call_to": int(call_to),
-			"emp_numbers": employee_ids,
-			"emp_tags": [],
-			"is_exclude_numbers": True,
-			"page_no": 1,
-			"page_size": 100
-		}
-		update_last_fetched_time(end_point_name)
-		result = post_api(url, token, payload)
-		handle_never_attended_calls(result, company)
+		while True:
+			payload = {
+				"call_from": int(call_from),
+				"call_to": int(call_to),
+				"emp_numbers": employee_ids,
+				"emp_tags": [],
+				"is_exclude_numbers": True,
+				"page_no": page_no,
+				"page_size": 100
+			}
+			result = post_api(url, token, payload)
+			if not result:
+				break
+			handle_never_attended_calls(result, company)
+			page_no += 1
 
-	# return {"status": "success", "message": "Analysis data inserted"}
+	update_last_fetched_time(end_point_name)
 
 def handle_never_attended_calls(response, company):
 	for emp in response:
@@ -326,22 +330,26 @@ def fetch_not_pickup_by_client_calls():
 		company = setting["company"]
 		token = setting["api_key"]
 		url = setting['domain_api'].rstrip('/') + endpoint
+		page_no = 1
 
-		payload = {
-			"call_from": int(call_from),
-			"call_to": int(call_to),
-			"call_types": ["Missed", "Rejected", "Incoming", "Outgoing"],
-			"emp_numbers": employee_ids,
-			"emp_tags": [],
-			"is_exclude_numbers": True,
-			"page_no": 1,
-			"page_size": 100
-		}
+		while True:
+			payload = {
+				"call_from": int(call_from),
+				"call_to": int(call_to),
+				"call_types": ["Missed", "Rejected", "Incoming", "Outgoing"],
+				"emp_numbers": employee_ids,
+				"emp_tags": [],
+				"is_exclude_numbers": True,
+				"page_no": page_no,
+				"page_size": 100
+			}
+			result = post_api(url, token, payload)
+			if not result:
+				break
+			handle_not_pickup_by_client_calls(result, company)
+			page_no += 1
 
-		update_last_fetched_time(end_point_name)
-		result = post_api(url, token, payload)
-		handle_not_pickup_by_client_calls(result, company)
-
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Analysis data inserted"}
 
 
