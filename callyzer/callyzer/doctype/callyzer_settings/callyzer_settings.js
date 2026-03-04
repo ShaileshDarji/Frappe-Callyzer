@@ -1,9 +1,9 @@
 frappe.ui.form.on('Callyzer Settings', {
-    refresh: function(frm) {
-        frm.add_custom_button(__('Fetch Employees'), function() {
+    refresh: function (frm) {
+        frm.add_custom_button(__('Fetch Employees'), function () {
             frappe.call({
                 method: "callyzer.api.fetch_employee.fetch_employees",
-                callback: function(r) {
+                callback: function (r) {
                     if (r.message) {
                         frappe.msgprint(r.message);
                     }
@@ -11,172 +11,160 @@ frappe.ui.form.on('Callyzer Settings', {
             });
         }, __('Action'));
 
-        frm.add_custom_button(__('Daywise Report'), function() {
-    frappe.prompt([
-        {
-            fieldtype: 'Date',
-            label: 'From Date',
-            fieldname: 'from_date',
-            reqd: true
-        },
-        {
-            fieldtype: 'Date',
-            label: 'To Date',
-            fieldname: 'to_date',
-            reqd: true
-        }
-    ],
-    function(values) {
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_day_wise_analytics_report",
-            args: {
-                call_from: values.from_date,
-                call_to: values.to_date
-            },
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        frm.add_custom_button(__('Daywise Report'), function () {
+            frappe.prompt([
+                {
+                    fieldtype: 'Date',
+                    label: 'From Date',
+                    fieldname: 'from_date',
+                    reqd: true
+                },
+                {
+                    fieldtype: 'Date',
+                    label: 'To Date',
+                    fieldname: 'to_date',
+                    reqd: true
                 }
-            }
-        });
-    },
-    __('Select Date Range'),
-    __('Get Report'));
-}, __('Action'));
+            ],
+                function (values) {
+                    frappe.call({
+                        method: "callyzer.api.call_log.bg_fetch_day_wise_analytics_report",
+                        args: {
+                            call_from: values.from_date,
+                            call_to: values.to_date
+                        },
+                        callback: function (r) {
+                            if (r.message) {
+                                frappe.msgprint(r.message);
+                            }
+                        }
+                    });
+                },
+                __('Select Date Range'),
+                __('Get Report'));
+        }, __('Action'));
 
- frm.add_custom_button(__('Unique Clients'), function() {
-   
-    
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_unique_clients_report",
-            
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        frm.add_custom_button(__('Unique Clients'), function () {
+
+
+            frappe.call({
+                method: "callyzer.api.call_log.bg_fetch_unique_clients_report",
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint(r.message);
+                    }
                 }
-            }
-        });
-  
-  
-}, __('Action'));
+            });
+
+        }, __('Action'));
 
 
-     frm.add_custom_button(__('Call History'), function() {
-    frappe.prompt([
-        {
-            fieldtype: 'Date',
-            label: 'From Date',
-            fieldname: 'from_date',
-            reqd: true
-        },
-        {
-            fieldtype: 'Date',
-            label: 'To Date',
-            fieldname: 'to_date',
-            reqd: true
-        }
-    ],
-    function(values) {
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_call_history_report",
-            args: {
-                call_from: values.from_date,
-                call_to: values.to_date
-            },
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        frm.add_custom_button(__('Call History'), function () {
+            frappe.prompt([
+                {
+                    fieldtype: 'Date',
+                    label: 'From Date',
+                    fieldname: 'from_date',
+                    reqd: true
+                },
+                {
+                    fieldtype: 'Date',
+                    label: 'To Date',
+                    fieldname: 'to_date',
+                    reqd: true
                 }
-            }
-        });
-    },
-    __('Select Date Range'),
-    __('Get Report'));
-}, __('Action'));
+            ],
+                function (values) {
+                    frappe.call({
+                        method: "callyzer.api.call_log.bg_fetch_call_history_report",
+                        args: {
+                            call_from: values.from_date,
+                            call_to: values.to_date
+                        },
+                        callback: function (r) {
+                            if (r.message) {
+                                frappe.msgprint(r.message);
+                            }
+                        }
+                    });
+                },
+                __('Select Date Range'),
+                __('Get Report'));
+        }, __('Action'));
 
 
-frm.add_custom_button(__('Hourly Analytics'), function() {
-   
-    
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_hourly_analytics_report",
-            
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        frm.add_custom_button(__('Hourly Analytics'), function () {
+
+
+            frappe.call({
+                method: "callyzer.api.call_log.bg_fetch_hourly_analytics_report",
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint(r.message);
+                    }
                 }
-            }
-        });
-  
-  
-}, __('Action'));
+            });
 
-frm.add_custom_button(__('Not Picked'), function() {
-   
-    
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_not_pickup_by_client_calls",
-            
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        }, __('Action'));
+
+        frm.add_custom_button(__('Not Picked'), function () {
+
+
+            frappe.call({
+                method: "callyzer.api.call_log.bg_fetch_not_pickup_by_client_calls",
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint(r.message);
+                    }
                 }
-            }
-        });
-  
-  
-}, __('Action'));
+            });
 
-frm.add_custom_button(__('Never Attended'), function() {
-   
-    
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_never_attended_calls",
-            
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        }, __('Action'));
+
+        frm.add_custom_button(__('Never Attended'), function () {
+
+
+            frappe.call({
+                method: "callyzer.api.call_log.bg_fetch_never_attended_calls",
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint(r.message);
+                    }
                 }
-            }
-        });
-  
-  
-}, __('Action'));
+            });
 
-frm.add_custom_button(__('Fetch Analysis'), function() {
-   
-    
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_analysis_report",
-            
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        }, __('Action'));
+
+        frm.add_custom_button(__('Fetch Analysis'), function () {
+
+
+            frappe.call({
+                method: "callyzer.api.call_log.bg_fetch_analysis_report",
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint(r.message);
+                    }
                 }
-            }
-        });
-  
-  
-}, __('Action'));
+            });
+
+        }, __('Action'));
 
 
-frm.add_custom_button(__('Employee Summary'), function() {
-   
-    
-        frappe.call({
-            method: "callyzer.api.call_log.fetch_employee_summary_report",
-            
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(r.message);
+        frm.add_custom_button(__('Employee Summary'), function () {
+
+
+            frappe.call({
+                method: "callyzer.api.call_log.bg_fetch_employee_summary_report",
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint(r.message);
+                    }
                 }
-            }
-        });
-  
-  
-}, __('Action'));
+            });
 
-        frm.add_custom_button(__('Fetch Call By ID'), function() {
+        }, __('Action'));
+
+        frm.add_custom_button(__('Fetch Call By ID'), function () {
             let d = new frappe.ui.Dialog({
                 title: 'Enter Call Log Unique ID',
                 fields: [
@@ -199,7 +187,7 @@ frm.add_custom_button(__('Employee Summary'), function() {
                             api_key: frm.doc.api_key,
                             domain_api: frm.doc.domain_api
                         },
-                        callback: function(r) {
+                        callback: function (r) {
                             if (r.message && r.message.status === "success") {
                                 frappe.msgprint(__("Fetched and inserted {0} call log(s)", [r.message.inserted]));
                             } else {
@@ -214,7 +202,7 @@ frm.add_custom_button(__('Employee Summary'), function() {
         }, __('Action'));
 
         // Remove Call Recording Button
-        frm.add_custom_button(__('Remove Call Recording'), function() {
+        frm.add_custom_button(__('Remove Call Recording'), function () {
             let d = new frappe.ui.Dialog({
                 title: 'Enter Call Log Unique ID(s)',
                 fields: [
@@ -236,7 +224,7 @@ frm.add_custom_button(__('Employee Summary'), function() {
                             unique_ids: ids,
                             company: frm.doc.name
                         },
-                        callback: function(r) {
+                        callback: function (r) {
                             if (r.message.status === "success") {
                                 frappe.msgprint(__("Call recording(s) removed successfully."));
                             } else {
@@ -248,10 +236,10 @@ frm.add_custom_button(__('Employee Summary'), function() {
             });
             d.show();
         }, __('Action'));
-    
 
-        frm.add_custom_button(__('Fetch Summary Report'), function() {
-            const today = frappe.datetime.get_datetime_as_string(); 
+
+        frm.add_custom_button(__('Fetch Summary Report'), function () {
+            const today = frappe.datetime.get_datetime_as_string();
             const one_month_ago = frappe.datetime.add_days(today, -1);
 
             const d = new frappe.ui.Dialog({
@@ -284,7 +272,7 @@ frm.add_custom_button(__('Employee Summary'), function() {
                             end_date: values.end_date,
                             company: frm.doc.company
                         },
-                        callback: function(r) {
+                        callback: function (r) {
                             if (r.message) {
                                 const summary = r.message.result;
                                 let content = `<div><strong>Summary Report</strong></div><br/>`;
@@ -296,12 +284,12 @@ frm.add_custom_button(__('Employee Summary'), function() {
                                     title: 'Summary Report Result',
                                     size: 'large',
                                     fields: [
-                                                {
-                                                    fieldtype: 'HTML',
-                                                    fieldname: 'summary_html',
-                                                    options: content
-                                                }
-                                            ],
+                                        {
+                                            fieldtype: 'HTML',
+                                            fieldname: 'summary_html',
+                                            options: content
+                                        }
+                                    ],
                                     primary_action_label: 'Print',
                                     primary_action() {
                                         const print_window = window.open('', '', 'width=800,height=600');
@@ -311,9 +299,9 @@ frm.add_custom_button(__('Employee Summary'), function() {
                                     }
                                 });
 
-    result_dialog.set_message(content);
-    result_dialog.show();
-}
+                                result_dialog.set_message(content);
+                                result_dialog.show();
+                            }
 
                         }
                     });
