@@ -252,22 +252,22 @@ def fetch_never_attended_calls():
 
 	for setting in settings:
 		company = setting["company"]
-		url = setting['domain_api'] + endpoint
+		url = setting['domain_api'].rstrip('/') + endpoint
 		token = setting["api_key"]
-  
+
 		payload = {
 			"call_from": int(call_from),
 			"call_to": int(call_to),
 			"emp_numbers": employee_ids,
-			"emp_tags": ["api"],
+			"emp_tags": [],
 			"is_exclude_numbers": True,
 			"page_no": 1,
-			"page_size": 10
+			"page_size": 100
 		}
 		update_last_fetched_time(end_point_name)
 		result = post_api(url, token, payload)
 		handle_never_attended_calls(result, company)
-		
+
 	# return {"status": "success", "message": "Analysis data inserted"}
 
 def handle_never_attended_calls(response, company):
@@ -278,34 +278,44 @@ def handle_never_attended_calls(response, company):
 			process_employee(emp)
 
 		for log in emp.get("call_logs", []):
+			external_id = log.get("id")
+
+			# Try to find an existing Call History Log for linking
 			call_log = frappe.db.get_value(
 				"Call History Log",
-				{"external_id": log.get("id")},
+				{"external_id": external_id},
 				"name"
 			)
-			if not call_log:
+
+			# Skip Callyzer Attendance Call creation only if already exists
+			if call_log and frappe.db.exists("Callyzer Attendance Call", {"call_log": call_log}):
 				continue
-			if not frappe.db.exists("Callyzer Attendance Call", {"call_log": call_log}):
-				doc = frappe.new_doc("Callyzer Attendance Call")
-				doc.employee = emp_number
-				doc.emp_code = emp.get("emp_code")
-				doc.emp_name = emp.get("emp_name")
-				doc.emp_number = emp_number
-				doc.call_status = "Unattended Incoming"
-				doc.client_name = emp.get("client_name")
-				doc.client_number = emp.get("client_number")
+			if not call_log and frappe.db.exists("Callyzer Attendance Call", {"external_id": external_id}):
+				continue
+
+			call_date = log.get("call_date")
+			doc = frappe.new_doc("Callyzer Attendance Call")
+			doc.employee = emp_number
+			doc.emp_code = emp.get("emp_code")
+			doc.emp_name = emp.get("emp_name")
+			doc.emp_number = emp_number
+			doc.call_status = "Unattended Incoming"
+			doc.client_name = log.get("client_name") or emp.get("client_name")
+			doc.client_number = log.get("client_number") or emp.get("client_number")
+			doc.external_id = external_id
+			if call_log:
 				doc.call_log = call_log
-				doc.duration = log.get("duration")
-				doc.call_type = log.get("call_type")
-				call_date = log.get("call_date")
-				doc.call_date = getdate(call_date)
-				doc.call_time = log.get("call_time")
-				doc.note = log.get("note")
-				doc.call_recording_url = log.get("call_recording_url")
-				doc.synced_at = log.get("synced_at")
-				doc.modified_at = log.get("modified_at")
-				doc.company = company
-				doc.insert(ignore_permissions=True)
+			doc.duration = log.get("duration")
+			doc.call_type = log.get("call_type")
+			doc.call_date = getdate(call_date)
+			doc.call_time = log.get("call_time")
+			doc.note = log.get("note")
+			doc.call_recording_url = log.get("call_recording_url")
+			doc.synced_at = log.get("synced_at")
+			doc.modified_at = log.get("modified_at")
+			doc.company = company
+			doc.insert(ignore_permissions=True)
+
 
 #Fetch Not Pickup By Client.
 @frappe.whitelist()
@@ -318,23 +328,23 @@ def fetch_not_pickup_by_client_calls():
 	for setting in settings:
 		company = setting["company"]
 		token = setting["api_key"]
-		url = setting['domain_api'] + endpoint
+		url = setting['domain_api'].rstrip('/') + endpoint
 
 		payload = {
 			"call_from": int(call_from),
 			"call_to": int(call_to),
 			"call_types": ["Missed", "Rejected", "Incoming", "Outgoing"],
 			"emp_numbers": employee_ids,
-			"emp_tags": ["api"],
+			"emp_tags": [],
 			"is_exclude_numbers": True,
 			"page_no": 1,
-			"page_size": 10
+			"page_size": 100
 		}
-		
+
 		update_last_fetched_time(end_point_name)
 		result = post_api(url, token, payload)
 		handle_not_pickup_by_client_calls(result, company)
-		
+
 	return {"status": "success", "message": "Analysis data inserted"}
 
 
@@ -342,41 +352,50 @@ def handle_not_pickup_by_client_calls(response, company):
 	for emp in response:
 		emp_number = emp.get("emp_number")
 		if not emp_number:
-			continue 
+			continue
 
-		# Ensure employee exists or process if not
 		if not frappe.db.exists("Callyzer Employee", {"employee_no": emp_number}):
 			process_employee(emp)
 
 		for log in emp.get("call_logs", []):
+			external_id = log.get("id")
+
+			# Try to find an existing Call History Log for linking
 			call_log = frappe.db.get_value(
 				"Call History Log",
-				{"external_id": log.get("id")},
+				{"external_id": external_id},
 				"name"
 			)
-			if not call_log:
+
+			# Skip only if Callyzer Attendance Call already created
+			if call_log and frappe.db.exists("Callyzer Attendance Call", {"call_log": call_log}):
 				continue
-			if not frappe.db.exists("Callyzer Attendance Call", {"call_log": call_log}):
-				doc = frappe.new_doc("Callyzer Attendance Call")
-				doc.employee = emp_number
-				doc.emp_code = emp.get("emp_code")
-				doc.emp_name = emp.get("emp_name")
-				doc.emp_number = emp_number
-				doc.call_status = "Unattended Outgoing"
-				doc.client_name = emp.get("client_name")
-				doc.client_number = emp.get("client_number")
+			if not call_log and frappe.db.exists("Callyzer Attendance Call", {"external_id": external_id}):
+				continue
+
+			call_date = log.get("call_date")
+			doc = frappe.new_doc("Callyzer Attendance Call")
+			doc.employee = emp_number
+			doc.emp_code = emp.get("emp_code")
+			doc.emp_name = emp.get("emp_name")
+			doc.emp_number = emp_number
+			doc.call_status = "Unattended Outgoing"
+			doc.client_name = log.get("client_name") or emp.get("client_name")
+			doc.client_number = log.get("client_number") or emp.get("client_number")
+			doc.external_id = external_id
+			if call_log:
 				doc.call_log = call_log
-				doc.duration = log.get("duration")
-				doc.call_type = log.get("call_type")
-				call_date = log.get("call_date")
-				doc.call_date = getdate(call_date)
-				doc.call_time = log.get("call_time")
-				doc.note = log.get("note")
-				doc.call_recording_url = log.get("call_recording_url")
-				doc.synced_at = log.get("synced_at")
-				doc.modified_at = log.get("modified_at")
-				doc.company = company
-				doc.insert(ignore_permissions=True)
+			doc.duration = log.get("duration")
+			doc.call_type = log.get("call_type")
+			doc.call_date = getdate(call_date)
+			doc.call_time = log.get("call_time")
+			doc.note = log.get("note")
+			doc.call_recording_url = log.get("call_recording_url")
+			doc.synced_at = log.get("synced_at")
+			doc.modified_at = log.get("modified_at")
+			doc.company = company
+			doc.insert(ignore_permissions=True)
+
 
 # Fetch Unique Clients Report => Tested working fine
 @frappe.whitelist()
