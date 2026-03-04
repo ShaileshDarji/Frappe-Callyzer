@@ -36,6 +36,14 @@
     "parenttype": "Callyzer Endpoint Settings"
    },
    {
+    "endpoint": "/call-log/employee-summary",
+    "endpoint_name": "Employee Summary",
+    "last_fetch": "2025-05-21 00:00:50.418223",
+    "parent": "Callyzer Endpoint Settings",
+    "parentfield": "endpoints",
+    "parenttype": "Callyzer Endpoint Settings"
+   },
+   {
     "endpoint": "/lead/get",
     "endpoint_name": "Fetch Leads",
     "last_fetch": "2025-05-14 18:57:51",

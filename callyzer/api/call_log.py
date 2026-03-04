@@ -1,6 +1,7 @@
 import frappe
 import requests
 import json
+import calendar
 from callyzer.callyzer.utils import get_callyzer_settings, normalize_payload, get_employees, format_time_timestamp_, get_endpoint, update_last_fetched_time
 from callyzer.api.fetch_employee import parse_datetime, process_employee
 from frappe import _
@@ -95,7 +96,7 @@ def process_call_logs(employee_name, call_logs, company):
 #Tested working
 @frappe.whitelist()
 def fetch_employee_summary_report():
-	end_point_name ="Fetch Employee Details"
+	end_point_name = "Employee Summary"
 	endpoint, call_from, call_to = get_endpoint(end_point_name)
 	employee_ids = get_employees()
 
@@ -104,7 +105,7 @@ def fetch_employee_summary_report():
 	for setting in settings:
 		company = setting["company"]
 		
-		url = setting['domain_api'] + endpoint
+		url = setting['domain_api'].rstrip('/') + endpoint
 		token = setting["api_key"]
 		payload = {
 			"call_from": int(call_from),
@@ -115,7 +116,7 @@ def fetch_employee_summary_report():
 			"is_exclude_numbers": True
 		}
 		update_last_fetched_time(end_point_name)
-		result = get_api(url, token, payload)
+		result = post_api(url, token, payload)
 		handle_employee_summary_response(result, company)
 		
 	return {"status": "success", "message": "Employee summary report fetched successfully"}
@@ -527,9 +528,10 @@ def fetch_day_wise_analytics_report():
 	call_to = frappe.form_dict.get("call_to")
 
 	if call_from and call_to:
-		# Convert to Unix timestamp if needed
-		call_from = int(time.mktime(frappe.utils.getdate(call_from).timetuple()))
-		call_to = int(time.mktime(frappe.utils.getdate(call_to).timetuple()))
+		# Convert date strings to UTC Unix timestamps.
+		# calendar.timegm() treats naive datetimes as UTC (unlike time.mktime which uses local tz)
+		call_from = calendar.timegm(frappe.utils.getdate(call_from).timetuple())
+		call_to = calendar.timegm(frappe.utils.getdate(call_to).timetuple())
 		endpoint = get_endpoint(end_point_name)[0]  # only get the endpoint string
 	else:
 		# Use default logic if dates are not provided
@@ -617,13 +619,14 @@ def fetch_call_history_report():
 	call_to = frappe.form_dict.get("call_to")
 
 	if call_from and call_to:
-		# Convert date strings to Unix timestamps.
-		# call_from = start of the from_date (00:00:00)
-		# call_to   = end of the to_date (23:59:59) so the full last day is included
+		# Convert date strings to UTC Unix timestamps.
+		# calendar.timegm() treats naive datetimes as UTC (unlike time.mktime which uses local tz)
+		# call_from = start of the from_date (00:00:00 UTC)
+		# call_to   = end of the to_date (23:59:59 UTC) so the full last day is included
 		from datetime import datetime as _dt, time as _time
-		call_from = int(time.mktime(frappe.utils.getdate(call_from).timetuple()))
+		call_from = calendar.timegm(frappe.utils.getdate(call_from).timetuple())
 		call_to_date = frappe.utils.getdate(call_to)
-		call_to = int(time.mktime(_dt.combine(call_to_date, _time(23, 59, 59)).timetuple()))
+		call_to = calendar.timegm(_dt.combine(call_to_date, _time(23, 59, 59)).timetuple())
 		endpoint = get_endpoint(end_point_name)[0]  # only get the endpoint string
 	else:
 		# Use default logic if dates are not provided
@@ -969,8 +972,9 @@ def fetch_call_history_report_daily():
 	call_from_dt = datetime.combine(today_date, time.min)  # 12:00 AM
 	call_to_dt = datetime.combine(today_date, time.max)    # 11:59:59 PM
 
-	call_from = int(pytime.mktime(call_from_dt.timetuple()))
-	call_to = int(pytime.mktime(call_to_dt.timetuple()))
+	# calendar.timegm() ensures UTC is used regardless of server local timezone
+	call_from = calendar.timegm(call_from_dt.timetuple())
+	call_to = calendar.timegm(call_to_dt.timetuple())
 
 	endpoint = get_endpoint(end_point_name)[0]  # Only get the endpoint string
 
