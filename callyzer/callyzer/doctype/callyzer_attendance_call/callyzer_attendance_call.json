@@ -1,180 +1,185 @@
 {
- "actions": [],
- "autoname": "field:call_log",
- "creation": "2025-05-17 16:09:45.605190",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "employee",
-  "emp_name",
-  "company",
-  "column_break_kjym",
-  "emp_code",
-  "emp_number",
-  "section_break_xpgp",
-  "client_name",
-  "column_break_bbxm",
-  "client_number",
-  "section_break_wler",
-  "call_status",
-  "call_type",
-  "call_log",
-  "call_date",
-  "call_time",
-  "column_break_bbtb",
-  "duration",
-  "synced_at",
-  "modified_at",
-  "call_recording_url",
-  "section_break_mdln",
-  "note"
- ],
- "fields": [
-  {
-   "fieldname": "call_status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Call Status",
-   "options": "Unattended Incoming\nUnattended Outgoing",
-   "reqd": 1
-  },
-  {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "label": "Employee",
-   "options": "Callyzer Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "emp_name",
-   "fieldtype": "Data",
-   "label": "Emp Name"
-  },
-  {
-   "fieldname": "emp_code",
-   "fieldtype": "Data",
-   "label": "Emp Code"
-  },
-  {
-   "fieldname": "column_break_kjym",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "emp_number",
-   "fieldtype": "Data",
-   "label": "Emp Number"
-  },
-  {
-   "fieldname": "section_break_xpgp",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "client_name",
-   "fieldtype": "Data",
-   "label": "Client Name"
-  },
-  {
-   "fieldname": "column_break_bbxm",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "client_number",
-   "fieldtype": "Data",
-   "label": "Client Number",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_break_wler",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "call_log",
-   "fieldtype": "Link",
-   "label": "Call Log",
-   "options": "Call History Log",
-   "unique": 1
-  },
-  {
-   "fieldname": "call_date",
-   "fieldtype": "Date",
-   "label": "Call Date"
-  },
-  {
-   "fieldname": "call_time",
-   "fieldtype": "Data",
-   "label": "Call Time"
-  },
-  {
-   "fieldname": "column_break_bbtb",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "call_type",
-   "fieldtype": "Data",
-   "label": "Call Type"
-  },
-  {
-   "fieldname": "synced_at",
-   "fieldtype": "Data",
-   "label": "Synced At"
-  },
-  {
-   "fieldname": "modified_at",
-   "fieldtype": "Data",
-   "label": "Modified At"
-  },
-  {
-   "fieldname": "call_recording_url",
-   "fieldtype": "Data",
-   "label": "Call Recording Url"
-  },
-  {
-   "fieldname": "section_break_mdln",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "note",
-   "fieldtype": "Text",
-   "label": "Note"
-  },
-  {
-   "fieldname": "duration",
-   "fieldtype": "Duration",
-   "label": "Duration"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-05-24 20:39:20.631637",
- "modified_by": "Administrator",
- "module": "Callyzer",
- "name": "Callyzer Attendance Call",
- "naming_rule": "By fieldname",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "sort_field": "creation",
- "sort_order": "DESC",
- "states": []
+    "actions": [],
+    "autoname": "CAC-.####",
+    "creation": "2025-05-17 16:09:45.605190",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "employee",
+        "emp_name",
+        "company",
+        "column_break_kjym",
+        "emp_code",
+        "emp_number",
+        "section_break_xpgp",
+        "client_name",
+        "column_break_bbxm",
+        "client_number",
+        "section_break_wler",
+        "call_status",
+        "call_type",
+        "call_log",
+        "external_id",
+        "call_date",
+        "call_time",
+        "column_break_bbtb",
+        "duration",
+        "synced_at",
+        "modified_at",
+        "call_recording_url",
+        "section_break_mdln",
+        "note"
+    ],
+    "fields": [
+        {
+            "fieldname": "call_status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Call Status",
+            "options": "Unattended Incoming\nUnattended Outgoing",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Employee",
+            "options": "Callyzer Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "emp_name",
+            "fieldtype": "Data",
+            "label": "Emp Name"
+        },
+        {
+            "fieldname": "emp_code",
+            "fieldtype": "Data",
+            "label": "Emp Code"
+        },
+        {
+            "fieldname": "column_break_kjym",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "emp_number",
+            "fieldtype": "Data",
+            "label": "Emp Number"
+        },
+        {
+            "fieldname": "section_break_xpgp",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "client_name",
+            "fieldtype": "Data",
+            "label": "Client Name"
+        },
+        {
+            "fieldname": "column_break_bbxm",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "client_number",
+            "fieldtype": "Data",
+            "label": "Client Number",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_wler",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "call_log",
+            "fieldtype": "Link",
+            "label": "Call Log",
+            "options": "Call History Log"
+        },
+        {
+            "fieldname": "external_id",
+            "fieldtype": "Data",
+            "label": "External ID"
+        },
+        {
+            "fieldname": "call_date",
+            "fieldtype": "Date",
+            "label": "Call Date"
+        },
+        {
+            "fieldname": "call_time",
+            "fieldtype": "Data",
+            "label": "Call Time"
+        },
+        {
+            "fieldname": "column_break_bbtb",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "call_type",
+            "fieldtype": "Data",
+            "label": "Call Type"
+        },
+        {
+            "fieldname": "synced_at",
+            "fieldtype": "Data",
+            "label": "Synced At"
+        },
+        {
+            "fieldname": "modified_at",
+            "fieldtype": "Data",
+            "label": "Modified At"
+        },
+        {
+            "fieldname": "call_recording_url",
+            "fieldtype": "Data",
+            "label": "Call Recording Url"
+        },
+        {
+            "fieldname": "section_break_mdln",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "note",
+            "fieldtype": "Text",
+            "label": "Note"
+        },
+        {
+            "fieldname": "duration",
+            "fieldtype": "Duration",
+            "label": "Duration"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
+        }
+    ],
+    "grid_page_length": 50,
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2025-05-24 20:39:20.631637",
+    "modified_by": "Administrator",
+    "module": "Callyzer",
+    "name": "Callyzer Attendance Call",
+    "naming_rule": "Expression (make_autoname)",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "row_format": "Dynamic",
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": []
 }
