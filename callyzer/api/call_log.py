@@ -18,23 +18,21 @@ def fetch_summary_report():
 	
 	for setting in settings:
 		company = setting["company"]
-		url = setting['domain_api']+endpoint
+		url = setting['domain_api'].rstrip('/') + endpoint
 		token = setting["api_key"]
 		payload = {
 			"call_from": int(call_from),
 			"call_to": int(call_to),
 			"call_types": ["Missed", "Rejected", "Incoming", "Outgoing"],
 			"emp_numbers": employee_ids,
-			# "duration_les_than": 200,
 			"emp_tags": [],
 			"is_exclude_numbers": True
 		}
-		
-		update_last_fetched_time(end_point_name)
+
 		results = post_api(url, token, payload)
-		
 		process_total_summary_calls(results, company)
-		
+
+	update_last_fetched_time(end_point_name)
 	return results
 
 #Tested working
@@ -115,10 +113,10 @@ def fetch_employee_summary_report():
 			"emp_tags": [],
 			"is_exclude_numbers": True
 		}
-		update_last_fetched_time(end_point_name)
 		result = post_api(url, token, payload)
 		handle_employee_summary_response(result, company)
-		
+
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Employee summary report fetched successfully"}
 
 #Tested working
@@ -167,7 +165,7 @@ def fetch_analysis_report():
 	for setting in settings:
 		company = setting["company"]
 
-		url = setting['domain_api'] + endpoint
+		url = setting['domain_api'].rstrip('/') + endpoint
 		token = setting["api_key"]
 
 		payload = {
@@ -176,11 +174,10 @@ def fetch_analysis_report():
 			"call_types": ["Missed", "Rejected", "Incoming", "Outgoing"],
 			"is_exclude_numbers": True
 		}
-		update_last_fetched_time(end_point_name)
 		result = post_api(url, token, payload)
-		# frappe.throw(str(result))
 		handle_analysis_report(call_from, call_to, company, result)
-		
+
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Analysis report fetched successfully"}
 
 
@@ -416,16 +413,16 @@ def fetch_unique_clients_report():
 			"call_to": int(call_to),
 			"call_types": ["Incoming", "Outgoing"],
 			"emp_numbers": employee_ids,
-			"emp_tags": ["api"],
+			"emp_tags": [],
 			"is_exclude_numbers": True,
 			"page_no": 1,
 			"page_size": 100
 		}
 
 		result = post_api(url, token, payload)
-		update_last_fetched_time(end_point_name)
 		process_unique_clients_response(result, company)
 
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Unique clients report fetched successfully"}
 
 def process_unique_clients_response(result, company):
@@ -495,10 +492,10 @@ def fetch_hourly_analytics_report():
 			"working_hour_to": "11:00",
 			"is_exclude_numbers": True
 		}
-		update_last_fetched_time(end_point_name)
-		result =  post_api(url, token, payload)
+		result = post_api(url, token, payload)
 		process_hourly_analytics_response(result, company)
 
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Hourly analytics report fetched successfully"}
  
 
@@ -574,9 +571,9 @@ def fetch_day_wise_analytics_report(call_from=None, call_to=None):
 		}
 
 		result = post_api(url, token, payload)
-		update_last_fetched_time(end_point_name)
 		process_daywise_analytics_response(result, company)
 
+	update_last_fetched_time(end_point_name)
 	return {
 		"status": "success",
 		"message": "Day-wise analytics report fetched successfully"
@@ -681,11 +678,9 @@ def fetch_call_history_report(call_from=None, call_to=None):
 				break
 
 			process_call_history_response(result, company)
-
-			# Go to the next page
 			page_no += 1
 
-		
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Call history report fetched successfully"}
 	   
 
@@ -762,9 +757,8 @@ def fetch_call_history_by_ids():
 		"unique_ids": unique_ids
 	}
 	result = post_api(url, api_key, payload)
-	update_last_fetched_time(end_point_name)
 	process_call_history_response(result, company)
-
+	update_last_fetched_time(end_point_name)
 	return {"status": "success", "message": "Call history fetched successfully"}
   
   
