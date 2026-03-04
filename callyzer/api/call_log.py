@@ -518,14 +518,14 @@ def process_hourly_analytics_response(result, company):
 
 #Fetch Day-wise Analytics Report
 @frappe.whitelist()
-def fetch_day_wise_analytics_report():
+def fetch_day_wise_analytics_report(call_from=None, call_to=None):
 	import time
 
 	end_point_name = "Day-wise Analytics"
 
-	# Try to get from request first
-	call_from = frappe.form_dict.get("call_from")
-	call_to = frappe.form_dict.get("call_to")
+	# Accept dates from direct kwargs (bg job) or from HTTP form_dict (web request)
+	call_from = call_from or frappe.form_dict.get("call_from")
+	call_to = call_to or frappe.form_dict.get("call_to")
 
 	if call_from and call_to:
 		# Convert date strings to UTC Unix timestamps.
@@ -612,11 +612,12 @@ def process_daywise_analytics_response(response_json, company):
 
 ##Fetch Call History Report #Tested working
 @frappe.whitelist()
-def fetch_call_history_report():
+def fetch_call_history_report(call_from=None, call_to=None):
 	end_point_name = "Call History"
-	
-	call_from = frappe.form_dict.get("call_from")
-	call_to = frappe.form_dict.get("call_to")
+
+	# Accept dates from direct kwargs (bg job) or from HTTP form_dict (web request)
+	call_from = call_from or frappe.form_dict.get("call_from")
+	call_to = call_to or frappe.form_dict.get("call_to")
 
 	if call_from and call_to:
 		# Convert date strings to UTC Unix timestamps.
@@ -943,22 +944,26 @@ def bg_fetch_hourly_analytics_report():
 	return _("Hourly analytics report job has been queued. You will be notified once it's complete.")
 
 @frappe.whitelist()
-def bg_fetch_day_wise_analytics_report():
+def bg_fetch_day_wise_analytics_report(call_from=None, call_to=None):
 	frappe.enqueue(
 		"callyzer.api.call_log.fetch_day_wise_analytics_report",
-		queue='default',  
-		timeout=600,  
-		now=False
+		queue='default',
+		timeout=600,
+		now=False,
+		call_from=call_from,
+		call_to=call_to
 	)
 	return _("Day-wise analytics report job has been queued. You will be notified once it's complete.")
 
 @frappe.whitelist()
-def bg_fetch_call_history_report():
+def bg_fetch_call_history_report(call_from=None, call_to=None):
 	frappe.enqueue(
 		"callyzer.api.call_log.fetch_call_history_report",
-		queue='default',  
-		timeout=600,  
-		now=False
+		queue='default',
+		timeout=600,
+		now=False,
+		call_from=call_from,
+		call_to=call_to
 	)
 	return _("Call history report job has been queued. You will be notified once it's complete.")
 
