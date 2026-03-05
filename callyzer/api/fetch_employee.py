@@ -8,28 +8,28 @@ from frappe import _
 from callyzer.callyzer.utils import get_callyzer_settings, normalize_payload, get_employees, format_time_timestamp_, get_endpoint, update_last_fetched_time
 
 
-def fetch_employee_data_from_api(setting):
-    url = setting.domain_api + setting.employee
-    headers = {
-        "Authorization": f"Bearer {setting.api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "emp_numbers": [],
-        "emp_tags": [],
-        "emp_name": "",
-        "emp_codes": [],
-        "page_no": 1,
-        "page_size": 2
-    }
+# def fetch_employee_data_from_api(setting):
+#     url = setting.domain_api + setting.employee
+#     headers = {
+#         "Authorization": f"Bearer {setting.api_key}",
+#         "Content-Type": "application/json"
+#     }
+#     payload = {
+#         "emp_numbers": [],
+#         "emp_tags": [],
+#         "emp_name": "",
+#         "emp_codes": [],
+#         "page_no": 1,
+#         "page_size": 2
+#     }
 
-    # Send GET with body (non-standard, but Callyzer allows it)
-    response = requests.request("GET", url, headers=headers, data=json.dumps(payload))
-    # Optional: handle errors
-    if response.status_code != 200:
-        frappe.throw(f"Failed to fetch employees: {response.text}")
+#     # Send GET with body (non-standard, but Callyzer allows it)
+#     response = requests.request("GET", url, headers=headers, data=json.dumps(payload))
+#     # Optional: handle errors
+#     if response.status_code != 200:
+#         frappe.throw(f"Failed to fetch employees: {response.text}")
 
-    return response.json()
+#     return response.json()
 
 
 @frappe.whitelist()
@@ -61,9 +61,9 @@ def process_employee_response(data):
     return created
 
 def fetch_employee_data_from_api(setting, endpoint):
-    url = setting.domain_api + endpoint
+    url = setting.domain_api.rstrip('/') + endpoint
     headers = {
-        "Authorization": f"Bearer {setting.api_key}",
+        "api-key": setting.api_key,        # Callyzer uses 'api-key', not 'Bearer'
         "Content-Type": "application/json"
     }
     payload = {
@@ -72,10 +72,10 @@ def fetch_employee_data_from_api(setting, endpoint):
         "emp_name": "",
         "emp_codes": [],
         "page_no": 1,
-        "page_size": 2
+        "page_size": 100    # was 2 — only returned 2 employees
     }
-    data=json.dumps(payload)
-    response = requests.request("GET", url, headers=headers, data=data)
+    data = json.dumps(payload)
+    response = requests.request("GET", url, headers=headers, data=data, timeout=60)
 
     if response.status_code != 200:
         frappe.throw(f"Failed to fetch employees: {response.text}")
@@ -110,13 +110,17 @@ def callyzer_employee_webhook():
         return {"status": "error", "message": "Processing failed"}
 
 def parse_datetime(value):
+    """Parse Callyzer date strings into Python datetimes.
+    Callyzer returns dates like '05 Mar 2026, 08:18 AM'.
+    """
     if not value:
         return None
-    try:
-        clean_value = value.split(' ')[0] + ' ' + value.split(' ')[1]
-        return datetime.strptime(clean_value, "%Y-%m-%d %H:%M:%S")
-    except Exception:
-        return None
+    for fmt in ("%d %b %Y, %I:%M %p", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(value.strip(), fmt)
+        except (ValueError, AttributeError):
+            continue
+    return None
 
 def process_employee(item):
     """Create employee if not exists and return employee name and creation status."""
