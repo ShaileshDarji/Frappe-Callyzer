@@ -63,7 +63,7 @@ def process_employee_response(data):
 def fetch_employee_data_from_api(setting, endpoint):
     url = setting.domain_api.rstrip('/') + endpoint
     headers = {
-        "api-key": setting.api_key,        # Callyzer uses 'api-key', not 'Bearer'
+        "Authorization": f"Bearer {setting.api_key}",
         "Content-Type": "application/json"
     }
     payload = {
@@ -72,7 +72,7 @@ def fetch_employee_data_from_api(setting, endpoint):
         "emp_name": "",
         "emp_codes": [],
         "page_no": 1,
-        "page_size": 100    # was 2 — only returned 2 employees
+        "page_size": 100    
     }
     data = json.dumps(payload)
     response = requests.request("GET", url, headers=headers, data=data, timeout=60)
