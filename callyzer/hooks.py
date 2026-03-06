@@ -155,17 +155,17 @@ fixtures = [
 
 scheduler_events = {
     "cron": {
-        "0 0,6,12,18 * * *": [  # Runs at 00:00, 06:00, 12:00, and 18:00
-            "callyzer.api.call_log.bg_fetch_summary_report",
-            "callyzer.api.call_log.bg_fetch_employee_summary_report",
-            "callyzer.api.call_log.bg_fetch_analysis_report",
-            "callyzer.api.call_log.bg_fetch_never_attended_calls",
-            "callyzer.api.call_log.bg_fetch_not_pickup_by_client_calls",
-            "callyzer.api.call_log.bg_fetch_unique_clients_report",
-            "callyzer.api.call_log.bg_fetch_hourly_analytics_report",
-            "callyzer.api.call_log.bg_fetch_day_wise_analytics_report",
-            "callyzer.api.call_log.bg_fetch_call_history_report",
-        ]
+        # Stagger jobs 2 minutes apart to avoid simultaneous Callyzer API requests (429 rate limit)
+        # All run at 00:xx, 06:xx, 12:xx, 18:xx local time
+        "0 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_call_history_report"],
+        "2 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_summary_report"],
+        "4 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_employee_summary_report"],
+        "6 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_analysis_report"],
+        "8 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_never_attended_calls"],
+        "10 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_not_pickup_by_client_calls"],
+        "12 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_unique_clients_report"],
+        "14 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_hourly_analytics_report"],
+        "16 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_day_wise_analytics_report"],
     }
 }
 
