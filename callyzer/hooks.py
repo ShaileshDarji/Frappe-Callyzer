@@ -162,10 +162,10 @@ scheduler_events = {
         "4 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_employee_summary_report"],
         "6 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_analysis_report"],
         "8 0,6,12,18 * * *":   ["callyzer.api.call_log.bg_fetch_never_attended_calls"],
-        "10 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_not_pickup_by_client_calls"],
-        "12 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_unique_clients_report"],
-        "14 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_hourly_analytics_report"],
-        "16 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_day_wise_analytics_report"],
+        "13 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_not_pickup_by_client_calls"],
+        "20 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_unique_clients_report"],
+        "25 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_hourly_analytics_report"],
+        "30 0,6,12,18 * * *":  ["callyzer.api.call_log.bg_fetch_day_wise_analytics_report"],
     }
 }
 
