@@ -865,6 +865,15 @@ def post_api(url, api_key, payload):
 				time.sleep(wait)
 				continue  # retry
 
+			if response.status_code == 400:
+				# Server-side error (e.g. DB recovery conflict on later pages) — log briefly and return None
+				# so pagination loops exit via `if not result: break` without a full stack trace entry
+				frappe.log_error(
+					f"Callyzer API returned 400 for {url}. Stopping pagination.",
+					"Callyzer API 400"
+				)
+				return None
+
 			if response.status_code != 200:
 				frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
 
@@ -883,6 +892,7 @@ def post_api(url, api_key, payload):
 		"Callyzer Rate Limit Exceeded"
 	)
 	return {}
+
 
 def get_api(url, api_key, payload):
 	url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
