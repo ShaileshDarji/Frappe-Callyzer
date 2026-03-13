@@ -30,6 +30,8 @@ def fetch_summary_report():
 		}
 
 		results = post_api(url, token, payload)
+		if not results:
+			continue
 		process_total_summary_calls(results, company)
 
 	update_last_fetched_time(end_point_name)
@@ -114,6 +116,8 @@ def fetch_employee_summary_report():
 			"is_exclude_numbers": True
 		}
 		result = post_api(url, token, payload)
+		if result is None:
+			continue
 		handle_employee_summary_response(result, company)
 
 	update_last_fetched_time(end_point_name)
@@ -175,6 +179,8 @@ def fetch_analysis_report():
 			"is_exclude_numbers": True
 		}
 		result = post_api(url, token, payload)
+		if not result:
+			continue
 		handle_analysis_report(call_from, call_to, company, result)
 
 	update_last_fetched_time(end_point_name)
@@ -436,6 +442,8 @@ def fetch_unique_clients_report():
 		}
 
 		result = post_api(url, token, payload)
+		if result is None:
+			continue
 		process_unique_clients_response(result, company)
 
 	update_last_fetched_time(end_point_name)
@@ -509,6 +517,8 @@ def fetch_hourly_analytics_report():
 			"is_exclude_numbers": True
 		}
 		result = post_api(url, token, payload)
+		if result is None:
+			continue
 		process_hourly_analytics_response(result, company)
 
 	update_last_fetched_time(end_point_name)
@@ -587,6 +597,8 @@ def fetch_day_wise_analytics_report(call_from=None, call_to=None):
 		}
 
 		result = post_api(url, token, payload)
+		if result is None:
+			continue
 		process_daywise_analytics_response(result, company)
 
 	update_last_fetched_time(end_point_name)
@@ -877,7 +889,13 @@ def post_api(url, api_key, payload):
 			if response.status_code != 200:
 				frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
 
-			return response.json().get("result", {})
+			data = response.json()
+			if isinstance(data, list):
+				return data
+			if isinstance(data, dict):
+				# Return 'result' if present, otherwise return the whole dict
+				return data.get("result", data)
+			return data
 
 		except requests.exceptions.ReadTimeout:
 			frappe.log_error("Callyzer API Timeout", frappe.get_traceback())
@@ -919,7 +937,12 @@ def get_api(url, api_key, payload):
 			if response.status_code != 200:
 				frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
 
-			return response.json().get("result", {})
+			data = response.json()
+			if isinstance(data, list):
+				return data
+			if isinstance(data, dict):
+				return data.get("result", data)
+			return data
 
 		except requests.exceptions.ReadTimeout:
 			frappe.log_error("Callyzer API Timeout", frappe.get_traceback())
