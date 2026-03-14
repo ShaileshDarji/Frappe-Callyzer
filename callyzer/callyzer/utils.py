@@ -27,6 +27,7 @@ def normalize_payload(payload):
     else:
         frappe.throw(_("Unexpected payload format"))
 
+@frappe.whitelist(allow_guest=True)
 def get_employees():
     employees_id = []
     all_callyzer_employee = frappe.get_all("Callyzer Employee", fields=["name"])
