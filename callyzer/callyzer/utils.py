@@ -30,12 +30,34 @@ def normalize_payload(payload):
 @frappe.whitelist(allow_guest=True)
 def get_employees():
     employees_id = []
-    all_callyzer_employee = frappe.get_all("Callyzer Employee", fields=["name"])
+    all_callyzer_employee = frappe.get_all(
+        "Callyzer Employee",
+        filters={"is_active": 1},
+        fields=["name"]
+    )
     for employee in all_callyzer_employee:
         employees_id.append(employee.name)
     return employees_id
 
+def deactivate_invalid_employees(error_response, employee_ids):
+    """Parse Callyzer 400 response and deactivate employees that no longer exist."""
+    if not error_response:
+        return
 
+    # Callyzer returns: "The 785388806 numbers doesn't exist."
+    # or: "Invalid numbers '785388806, 733366003'."
+    import re
+    numbers_found = re.findall(r'\b\d{6,15}\b', error_response)
+
+    for number in numbers_found:
+        if number in employee_ids:
+            frappe.db.set_value("Callyzer Employee", number, "is_active", 0)
+            frappe.log_error(
+                f"Callyzer Employee {number} deactivated — no longer exists in Callyzer.",
+                "Callyzer Employee Deactivated"
+            )
+    frappe.db.commit()
+    
 def format_time_timestamp_(date):
     """Convert a datetime or UTC datetime string to a UTC Unix timestamp.
     Uses calendar.timegm() which always treats the input as UTC,

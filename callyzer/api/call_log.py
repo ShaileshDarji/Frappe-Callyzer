@@ -949,56 +949,62 @@ def callyzer_call_log_webhook():
 # ============================================================
 
 def post_api(url, api_key, payload, page_no=None):
-	url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
-	headers = build_callyzer_headers(api_key)
-	max_retries = 3
+    url = url.replace('https://', '__SCHEME__').replace('//', '/').replace('__SCHEME__', 'https://')
+    headers = build_callyzer_headers(api_key)
+    max_retries = 3
 
-	for attempt in range(max_retries):
-		try:
-			try:
-				response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
-			except requests.exceptions.ReadTimeout:
-				frappe.log_error("Callyzer API timed out (30s). Retrying with 60s timeout.", "Callyzer Timeout Retry")
-				response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=60)
+    for attempt in range(max_retries):
+        try:
+            try:
+                response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
+            except requests.exceptions.ReadTimeout:
+                frappe.log_error("Callyzer API timed out (30s). Retrying with 60s timeout.", "Callyzer Timeout Retry")
+                response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=60)
 
-			if response.status_code == 429:
-				wait = 2 ** attempt
-				frappe.log_error(
-					f"Callyzer: Rate limited (429) on attempt {attempt + 1}/{max_retries}. Waiting {wait}s.",
-					"Callyzer Rate Limit"
-				)
-				time_module.sleep(wait)
-				continue
+            if response.status_code == 429:
+                wait = 2 ** attempt
+                frappe.log_error(
+                    f"Callyzer: Rate limited (429) on attempt {attempt + 1}/{max_retries}. Waiting {wait}s.",
+                    "Callyzer Rate Limit"
+                )
+                time_module.sleep(wait)
+                continue
 
-			if response.status_code == 400:
-				frappe.log_error(
-					f"Callyzer API returned 400 for {url}\nPage: {page_no}\nPayload: {json.dumps(payload)}\nResponse: {response.text[:500]}",
-					"Callyzer API 400"
-				)
-				return None
+            if response.status_code == 400:
+                response_text = response.text
+                frappe.log_error(
+                    f"Callyzer API returned 400 for {url}\nPage: {page_no}\nPayload: {json.dumps(payload)}\nResponse: {response_text[:500]}",
+                    "Callyzer API 400"
+                )
+                # Deactivate employees that no longer exist in Callyzer
+                emp_numbers = payload.get("emp_numbers", [])
+                if emp_numbers and "doesn't exist" in response_text:
+                    from callyzer.callyzer.utils import deactivate_invalid_employees
+                    deactivate_invalid_employees(response_text, emp_numbers)
+                return None
 
-			if response.status_code != 200:
-				frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
+            if response.status_code != 200:
+                frappe.throw(_(f"Callyzer API request failed with status {response.status_code}: {response.text}"))
 
-			data = response.json()
-			if isinstance(data, list):
-				return data
-			if isinstance(data, dict):
-				return data.get("result", data)
-			return data
+            data = response.json()
+            if isinstance(data, list):
+                return data
+            if isinstance(data, dict):
+                return data.get("result", data)
+            return data
 
-		except requests.exceptions.ReadTimeout:
-			frappe.log_error("Callyzer API Timeout", frappe.get_traceback())
-			frappe.throw(_("Callyzer API timed out after retry. The server is taking too long to respond."))
-		except requests.exceptions.RequestException as e:
-			frappe.log_error("Callyzer API Error", frappe.get_traceback())
-			frappe.throw(_("Error communicating with Callyzer API: ") + str(e))
+        except requests.exceptions.ReadTimeout:
+            frappe.log_error("Callyzer API Timeout", frappe.get_traceback())
+            frappe.throw(_("Callyzer API timed out after retry. The server is taking too long to respond."))
+        except requests.exceptions.RequestException as e:
+            frappe.log_error("Callyzer API Error", frappe.get_traceback())
+            frappe.throw(_("Error communicating with Callyzer API: ") + str(e))
 
-	frappe.log_error(
-		f"Callyzer API rate-limited after {max_retries} retries. Skipping request to {url}.",
-		"Callyzer Rate Limit Exceeded"
-	)
-	return {}
+    frappe.log_error(
+        f"Callyzer API rate-limited after {max_retries} retries. Skipping request to {url}.",
+        "Callyzer Rate Limit Exceeded"
+    )
+    return {}
 
 
 def get_api(url, api_key, payload):
