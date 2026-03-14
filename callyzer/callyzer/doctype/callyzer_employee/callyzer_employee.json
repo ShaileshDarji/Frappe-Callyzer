@@ -14,6 +14,7 @@
   "mobile_no",
   "tags",
   "app_version",
+  "is_active",
   "section_break_udvr",
   "registered_at",
   "last_call_at",
@@ -151,12 +152,19 @@
    "fieldtype": "Data",
    "label": "Employee no.",
    "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-04 23:25:16.133126",
+ "modified": "2026-03-14 09:06:15.142930",
  "modified_by": "Administrator",
  "module": "Callyzer",
  "name": "Callyzer Employee",
